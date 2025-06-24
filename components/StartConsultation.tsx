@@ -16,6 +16,7 @@ import { DialogClose } from '@radix-ui/react-dialog'
 import { DropdownMenu, DropdownMenuTrigger } from './ui/dropdown-menu'
 import axios from 'axios'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 const StartConsultation = ({ doctor }:{ doctor:string }) => {
   const [note, setNote] = useState<string>("");
@@ -23,8 +24,11 @@ const StartConsultation = ({ doctor }:{ doctor:string }) => {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const router = useRouter();
+
   const handleNext = async () => {
     setLoading(true)
+    
     try {
       
       const res = await axios.post('/api/session-chat', {
@@ -33,15 +37,26 @@ const StartConsultation = ({ doctor }:{ doctor:string }) => {
       });
 
       console.log("Session Created", res.data);
-      toast.success("Information Saved!");
+      toast("Information saved Proceeding to the doctor's page!", {
+        style: {
+          backgroundColor: "green"
+        }
+      });
 
       setNote("")
+      router.push(`/dashboard/medical-agent/${res.data.data.sessionId}`)
 
     } catch (error) {
       console.error("Failed to create session:", error);
-      toast("Something went wrong. Try again.");
+      toast("Something went wrong. Try again.", {
+        style: {
+          backgroundColor: "red"
+        }
+      });
     }finally{
       setLoading(false)
+
+      
     }
 
   }
@@ -68,7 +83,7 @@ const StartConsultation = ({ doctor }:{ doctor:string }) => {
           </DialogDescription>
         </DialogHeader>
         <DropdownMenu >
-          <DropdownMenuTrigger asChild className='w-40'>
+          <DropdownMenuTrigger asChild >
               <Button variant={"outline"} >
                   {doctor}
               </Button>
